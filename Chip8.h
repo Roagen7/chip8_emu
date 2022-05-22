@@ -26,9 +26,7 @@ public:
     void cycle();
     void loadProgram(const std::string& location);
 
-
-    bool drawFlag();
-
+    bool getDrawFlag();
 
 
 private:
@@ -51,9 +49,11 @@ private:
     uint16_t stack[STACK] = { 0 };
     uint16_t SP = 0;
 
-    //user
+    //ui
     uint8_t graphics[GRAPHICS_HEIGHT * GRAPHICS_WIDTH] = { 0 };
     uint16_t key[KEY_S] = { 0 };
+
+    bool drawFlag = false;
 
 
     void opcodes_x0();
