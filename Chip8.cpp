@@ -160,11 +160,10 @@ void Chip8::cycle() {
 
     if(soundTimer > 0) soundTimer--;
 
-
 }
 
-bool Chip8::getDrawFlag() {
-    return false;
+bool Chip8::getDrawFlag() const {
+    return drawFlag;
 }
 
 void Chip8::loadProgram(const std::string& location) {
@@ -281,5 +280,11 @@ void Chip8::opcodes_xE() {
 }
 
 void Chip8::opcodes_xF() {
+
+}
+
+void Chip8::setDrawFlag(bool _drawFlag) {
+
+    this->drawFlag = _drawFlag;
 
 }

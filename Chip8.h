@@ -26,7 +26,8 @@ public:
     void cycle();
     void loadProgram(const std::string& location);
 
-    bool getDrawFlag();
+    bool getDrawFlag() const;
+    void setDrawFlag(bool _drawFlag);
 
 
 private:
