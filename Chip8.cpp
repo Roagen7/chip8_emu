@@ -25,10 +25,8 @@ void Chip8::cycle() {
 
     opcode = memory[PC] << 8 | memory[PC + 1];
 
-
-
-
-    if(PC == 557){
+//    std::cout << PC << std::endl;
+    if(PC == 561){
 
         std::cout << PC << std::endl;
 
@@ -336,13 +334,41 @@ void Chip8::opcodes_x8() {
 
     }
 
-
-
 }
 
 void Chip8::opcodes_xD() {
 
 
+    auto& vX = v[(opcode & 0x0F00) >> 8];
+    auto& vY = v[(opcode & 0x00F0) >> 4];
+    auto H = opcode & 0x000F;
+
+    v[0xF] = 0;
+
+
+    for(int y = 0; y < H; y++){
+
+        uint16_t pixel = memory[I+y];
+
+        for(int x = 0; x < 8; x++){
+
+            if((pixel & (0x80 >> x)) != 0){
+
+                auto& gr = graphics[vX + x + ((vY + y) * 64)];
+
+                if(gr == 1) v[0xF] = 1;
+
+                gr ^= 1;
+
+            }
+
+
+        }
+
+    }
+
+    drawFlag = true;
+    PC += 2;
 
 }
 

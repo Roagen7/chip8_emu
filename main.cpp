@@ -74,8 +74,6 @@ int main() {
     chip8->loadProgram("../invaders.c8");
 
 
-
-
     while(!engine.quit){
 
         chip8->cycle();
