@@ -1,5 +1,5 @@
 #include "Chip8.h"
-
+#include <iostream>
 
 Chip8* Chip8::_chip8 = nullptr;
 
@@ -24,6 +24,16 @@ void Chip8::cycle() {
     //fetch opcode
 
     opcode = memory[PC] << 8 | memory[PC + 1];
+
+
+
+
+    if(PC == 557){
+
+        std::cout << PC << std::endl;
+
+
+    }
 
     //decode opcode
 
@@ -224,41 +234,100 @@ void Chip8::opcodes_x0() {
 void Chip8::opcodes_x8() {
 
 
+    uint8_t& vX =  v[(opcode & 0x0F00) >> 8];
+    uint8_t& vY = v[(opcode & 0x00F0) >> 4];
+
+
     switch (opcode & 0x000F) {
 
         case 0x0000:
-            v[(opcode & 0x0F00) >> 8] = v[(opcode & 0x00F0) >> 4];
+            // for 0x8XY0 set vX = vY
+
+            vX = vY;
             PC += 2;
             break;
 
         case 0x0001:
 
+            // for 0x8XY1 set vX = vX | vY
+
+            vX |= vY;
+            PC += 2;
             break;
 
         case 0x0002:
+
+            // for 0x8XY2 set vX = vX & vY
+
+            vX &= vY;
+            PC += 2;
 
             break;
 
         case 0x0003:
 
+            // for 0x8XY3 set vX = vX ^ vY
+            vX ^= vY;
+            PC += 2;
             break;
 
         case 0x0004:
 
+            // for 0x8XY4 set vX = vX + vY, set vF = 1 if there is a carry, otherwise set vF = 0
+
+            if(vY > 0xFF - vX)
+                v[0xF] = 1;
+            else
+                v[0xF] = 0;
+
+            vX += vY;
+            PC += 2;
             break;
+
         case 0x0005:
 
+            // for 0x8XY5 set vX = vX - vY, set vF = 0 if there is a borrow, otherwise set vF = 1
+
+            if(vY > vX)
+                v[0xF] = 0;
+            else
+                v[0xF] = 1;
+
+            vX -= vY;
+            PC += 2;
             break;
 
         case 0x0006:
+
+            // for 0x8XY6 store vF = LSB(vX), then vX >> 1
+
+            v[0xF] = 0x1 & vX;
+            vX >>= 1;
+            PC += 2;
 
             break;
 
         case 0x0007:
 
+            // for 0x8XY7 set vX = vY - vX, if there is a borrow vF = 0, otherwise vF = 1
+
+            if(vX > vY)
+                v[0xF] = 0;
+            else
+                v[0xF] = 1;
+
+            vX = vY - vX;
+            PC += 2;
+
             break;
 
         case 0x000E:
+
+            // for 0x8XYE set vF = MSB(vX) , then vX << 1
+
+            v[0xF] = vX >> 7;
+            vX <<= 1;
+            PC += 2;
 
             break;
 
@@ -272,6 +341,8 @@ void Chip8::opcodes_x8() {
 }
 
 void Chip8::opcodes_xD() {
+
+
 
 }
 

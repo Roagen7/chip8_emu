@@ -1,3 +1,10 @@
+/*
+ * chip 8 emulator
+ * https://en.wikipedia.org/wiki/CHIP-8
+ *
+ */
+
+
 #pragma once
 
 #include <cstdint>
