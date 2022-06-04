@@ -27,6 +27,13 @@ void Chip8::cycle() {
 
     //decode opcode
 
+
+    if(PC == 728){
+
+        std::cout << PC << std::endl;
+
+    }
+
     switch(opcode & 0xF000){
 
         //execute opcode
@@ -368,7 +375,6 @@ void Chip8::opcodes_xE() {
 
     switch (opcode & 0x000F) {
 
-
         case 0x0001:
             // for 0xEXA1 if key pressed is equal to vX skip next instruction
 
@@ -389,7 +395,6 @@ void Chip8::opcodes_xE() {
             throw(0);
 
     }
-
 
 }
 
@@ -437,18 +442,46 @@ void Chip8::opcodes_xF() {
             break;
 
         case 0x0029:
+            I = vX * 0x5;
+            PC += 2;
 
             break;
 
         case 0x0033:
+            // store vX as bcd: first digit in memory[I], second digit in memory[I+1], third digit in memory[I+2]
+            // vX = mem[I]mem[I+1]mem[I+2]
 
+            memory[I]     = vX / 100;
+            memory[I + 1] = (vX / 10) % 10;
+            memory[I + 2] = vX % 10;
+
+            PC += 2;
             break;
 
-        case 0x0055:
+        case 0x0055: {
+
+            uint8_t x = (opcode & 0x0F00) >> 8;
+
+            for (int i = 0; i <= x; i++) {
+
+                memory[I + i] = v[i];
+
+            }
+            PC += 2;
 
             break;
+        }
 
         case 0x0065:
+
+            uint8_t x = (opcode & 0x0F00) >> 8;
+
+            for (int i = 0; i <= x; i++) {
+
+                 v[i] = memory[I + i] ;
+
+            }
+            PC += 2;
 
             break;
 

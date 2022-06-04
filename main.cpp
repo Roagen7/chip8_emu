@@ -107,7 +107,7 @@ int main() {
     init(engine);
 
     auto* chip8 = Chip8::Instance();
-    chip8->loadProgram("../invaders.c8");
+    chip8->loadProgram("../pong.rom");
 
 
     while(!engine.quit){
