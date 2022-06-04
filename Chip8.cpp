@@ -25,14 +25,6 @@ void Chip8::cycle() {
 
     opcode = memory[PC] << 8 | memory[PC + 1];
 
-//    std::cout << PC << std::endl;
-    if(PC == 561){
-
-        std::cout << PC << std::endl;
-
-
-    }
-
     //decode opcode
 
     switch(opcode & 0xF000){
@@ -362,7 +354,6 @@ void Chip8::opcodes_xD() {
 
             }
 
-
         }
 
     }
@@ -374,14 +365,107 @@ void Chip8::opcodes_xD() {
 
 void Chip8::opcodes_xE() {
 
+
+    switch (opcode & 0x000F) {
+
+
+        case 0x0001:
+            // for 0xEXA1 if key pressed is equal to vX skip next instruction
+
+            if(key[v[(opcode & 0x0F00) >> 8]]) PC += 2;
+            PC += 2;
+
+            break;
+
+        case 0x000E:
+            // for 0xEX9E if key pressed is not equal to vX skip next instruction
+
+            if(!key[v[(opcode & 0x0F00) >> 8]]) PC += 2;
+            PC += 2;
+
+            break;
+
+        default:
+            throw(0);
+
+    }
+
+
 }
 
 void Chip8::opcodes_xF() {
+
+
+    auto& vX = v[(opcode & 0x0F00) >> 8];
+
+    switch (opcode & 0x00FF) {
+
+        case 0x0007:
+            vX = delayTimer;
+            PC += 2;
+            break;
+
+        case 0x000A:
+            //await key press
+
+            for(int i = 0; i < KEY_S; i++){
+
+                if(key[i] != 0){
+
+                    vX = key[i];
+                    PC += 2;
+                    return;
+                }
+
+            }
+
+            break;
+
+        case 0x0015:
+            delayTimer = vX;
+            PC += 2;
+            break;
+
+        case 0x0018:
+            soundTimer = vX;
+            PC += 2;
+            break;
+
+        case 0x001E:
+            I += vX;
+            PC += 2;
+            break;
+
+        case 0x0029:
+
+            break;
+
+        case 0x0033:
+
+            break;
+
+        case 0x0055:
+
+            break;
+
+        case 0x0065:
+
+            break;
+
+    }
+
+
 
 }
 
 void Chip8::setDrawFlag(bool _drawFlag) {
 
     this->drawFlag = _drawFlag;
+
+}
+
+uint8_t Chip8::getGrahicsAt(int y, int x) {
+
+    return graphics[y * GRAPHICS_WIDTH + x];
 
 }

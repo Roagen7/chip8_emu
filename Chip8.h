@@ -36,6 +36,8 @@ public:
     bool getDrawFlag() const;
     void setDrawFlag(bool _drawFlag);
 
+    uint8_t getGrahicsAt(int y, int x);
+
 
 private:
 
