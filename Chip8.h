@@ -53,6 +53,13 @@ private:
 
     static Chip8* _chip8;
 
+    void (Chip8::*callTable[16])() = {
+            &Chip8::opcodes_x0, &Chip8::opcodes_x1, &Chip8::opcodes_x2, &Chip8::opcodes_x3,
+            &Chip8::opcodes_x4, &Chip8::opcodes_x5, &Chip8::opcodes_x6, &Chip8::opcodes_x7,
+            &Chip8::opcodes_x8, &Chip8::opcodes_x9, &Chip8::opcodes_xA, &Chip8::opcodes_xB,
+            &Chip8::opcodes_xC, &Chip8::opcodes_xD, &Chip8::opcodes_xE, &Chip8::opcodes_xF
+    };
+
     uint16_t opcode = 0;
     uint8_t memory[MEMORY] = {0};
 
@@ -74,8 +81,25 @@ private:
     bool drawFlag = false;
 
 
+
+
     void opcodes_x0();
+
+    void opcodes_x1();
+    void opcodes_x2();
+    void opcodes_x3();
+    void opcodes_x4();
+    void opcodes_x5();
+    void opcodes_x6();
+    void opcodes_x7();
+
     void opcodes_x8();
+
+    void opcodes_x9();
+    void opcodes_xA();
+    void opcodes_xB();
+    void opcodes_xC();
+
     void opcodes_xD();
     void opcodes_xE();
     void opcodes_xF();

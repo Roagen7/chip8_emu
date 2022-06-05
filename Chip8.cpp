@@ -57,134 +57,12 @@ void Chip8::cycle() {
     opcode = memory[PC] << 8 | memory[PC + 1];
 
 
-    //decode opcode
+    //decode opcode and call the right function
+    uint8_t firstDigit = (opcode & 0xF000) >> 12;
 
-    switch(opcode & 0xF000){
+    auto rightFunction = callTable[firstDigit];
 
-        //execute opcode
-
-        case 0x0000:
-
-            opcodes_x0();
-            break;
-
-
-        case 0x1000:
-
-            //for 0x1NNN jump to NNN
-            PC = opcode & 0x0FFF;
-
-            break;
-
-        case 0x2000:
-
-            //for 0x2NNN call subroutine at NNN
-            stack[SP++] = PC;
-            PC = opcode & 0x0FFF;
-
-            break;
-
-        case 0x3000:
-
-            //for 0x3XNN if vX == NN skip next instruction
-            if(v[(0x0F00 & opcode) >> 8] == (0x00FF & opcode)) PC += 2;
-
-            PC += 2;
-
-            break;
-
-        case 0x4000:
-
-            //for 0x4XNN if vX != NN skip next instruction
-            if(v[(0x0F00 & opcode) >> 8] != (0x00FF & opcode)) PC += 2;
-
-            PC += 2;
-
-            break;
-
-        case 0x5000:
-
-            //for 0x5XY0 if vX == vY skip next instruction
-            if(v[(0x0F00 & opcode) >> 8] == v[(0x00F0 & opcode) >> 4]) PC += 2;
-
-            PC += 2;
-
-            break;
-
-        case 0x6000:
-
-            //for 0x6XNN set vX = NN
-
-            v[(0x0F00 & opcode) >> 8] = 0x00FF & opcode;
-            PC += 2;
-
-            break;
-
-        case 0x7000:
-
-            //for 0x7XNN set vX += NN
-
-            v[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
-            PC += 2;
-
-            break;
-
-        case 0x8000:
-            opcodes_x8();
-            break;
-
-        case 0x9000:
-
-            //for 0x5XY0 if vX != vY skip next instruction
-
-            if(v[(0x0F00 & opcode) >> 8] == v[(0x00F0 & opcode) >> 4]) PC += 2;
-
-            PC += 2;
-
-            break;
-
-        case 0xA000:
-
-            //for 0xANNN set I = NNN
-
-            I = opcode & 0x0FFF;
-            PC += 2;
-
-            break;
-
-        case 0xB000:
-
-            //for 0xBNNN jump to v0 + NNN
-            PC = (0x0FFF & opcode) + v[0];
-
-            break;
-
-        case 0xC000:
-            //for 0xCXNN set Vx = rand() & NN
-
-            v[(opcode & 0x0F00) >> 8] = (rand() % 0xFF) & (opcode & 0x00FF);
-
-            PC += 2;
-
-            break;
-
-        case 0xD000:
-            opcodes_xD();
-            break;
-
-        case 0xE000:
-            opcodes_xE();
-            break;
-
-        case 0xF000:
-            opcodes_xF();
-            break;
-
-
-        default:
-            throw(0);
-
-    }
+    (this->*(rightFunction))(); // call the function on this
 
     //timers
 
@@ -540,5 +418,113 @@ void Chip8::setKey(uint8_t keycode) {
 void Chip8::unsetKey(uint8_t keycode) {
 
     key[keycode] = 0;
+
+}
+
+void Chip8::opcodes_x1() {
+
+    //for 0x1NNN jump to NNN
+
+    PC = opcode & 0x0FFF;
+
+}
+
+void Chip8::opcodes_x2() {
+
+    //for 0x2NNN call subroutine at NNN
+
+    stack[SP++] = PC;
+    PC = opcode & 0x0FFF;
+
+
+}
+
+void Chip8::opcodes_x3() {
+
+    //for 0x3XNN if vX == NN skip next instruction
+
+    if(v[(0x0F00 & opcode) >> 8] == (0x00FF & opcode)) PC += 2;
+
+    PC += 2;
+
+}
+
+void Chip8::opcodes_x4() {
+
+    //for 0x4XNN if vX != NN skip next instruction
+
+    if(v[(0x0F00 & opcode) >> 8] != (0x00FF & opcode)) PC += 2;
+
+    PC += 2;
+
+
+}
+
+void Chip8::opcodes_x5() {
+
+    //for 0x5XY0 if vX == vY skip next instruction
+
+    if(v[(0x0F00 & opcode) >> 8] == v[(0x00F0 & opcode) >> 4]) PC += 2;
+
+    PC += 2;
+
+}
+
+void Chip8::opcodes_x6() {
+
+    //for 0x6XNN set vX = NN
+
+    v[(0x0F00 & opcode) >> 8] = 0x00FF & opcode;
+
+    PC += 2;
+
+}
+
+void Chip8::opcodes_x7() {
+
+    v[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+
+    PC += 2;
+
+}
+
+void Chip8::opcodes_x9() {
+
+
+
+    if(v[(0x0F00 & opcode) >> 8] == v[(0x00F0 & opcode) >> 4]) PC += 2;
+
+    PC += 2;
+
+
+}
+
+void Chip8::opcodes_xA() {
+
+    //for 0xANNN set I = NNN
+
+    I = opcode & 0x0FFF;
+    PC += 2;
+
+
+}
+
+void Chip8::opcodes_xB() {
+
+
+    //for 0xBNNN jump to v0 + NNN
+    PC = (0x0FFF & opcode) + v[0];
+
+
+
+}
+
+void Chip8::opcodes_xC() {
+
+    //for 0xCXNN set Vx = rand() & NN
+
+    v[(opcode & 0x0F00) >> 8] = (rand() % 0xFF) & (opcode & 0x00FF);
+
+    PC += 2;
 
 }
