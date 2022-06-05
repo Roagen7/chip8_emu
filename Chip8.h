@@ -18,8 +18,12 @@
 #define GRAPHICS_WIDTH 64
 #define GRAPHICS_HEIGHT 32
 
-
 #define PC_START 0x200
+
+
+#define FONT_WIDTH 4
+#define FONT_HEIGHT 5
+#define FONT_CHARSET_SIZE 16
 
 class Chip8 {
 
@@ -37,6 +41,10 @@ public:
     void setDrawFlag(bool _drawFlag);
 
     uint8_t getGrahicsAt(int y, int x);
+
+    void setKey(uint8_t keycode);
+    void unsetKey(uint8_t keycode);
+
 
 
 private:

@@ -17,7 +17,38 @@ Chip8 *Chip8::Instance() {
 
 }
 
-Chip8::Chip8() = default;
+Chip8::Chip8(){
+
+    //load font
+
+    unsigned char font[FONT_HEIGHT * FONT_CHARSET_SIZE] =
+            {
+                    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+                    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+                    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+                    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+                    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+                    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+                    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+                    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+                    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+                    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+                    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+                    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+                    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+                    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+                    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+                    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+            };
+
+
+    for(int i = 0; i < FONT_HEIGHT * FONT_CHARSET_SIZE; i++){
+
+        memory[i] = font[i];
+
+    }
+
+};
 
 void Chip8::cycle() {
 
@@ -25,14 +56,8 @@ void Chip8::cycle() {
 
     opcode = memory[PC] << 8 | memory[PC + 1];
 
+
     //decode opcode
-
-
-    if(PC == 728){
-
-        std::cout << PC << std::endl;
-
-    }
 
     switch(opcode & 0xF000){
 
@@ -337,7 +362,7 @@ void Chip8::opcodes_x8() {
 
 void Chip8::opcodes_xD() {
 
-
+    //sprite
     auto& vX = v[(opcode & 0x0F00) >> 8];
     auto& vY = v[(opcode & 0x00F0) >> 4];
     auto H = opcode & 0x000F;
@@ -366,6 +391,7 @@ void Chip8::opcodes_xD() {
     }
 
     drawFlag = true;
+
     PC += 2;
 
 }
@@ -375,18 +401,20 @@ void Chip8::opcodes_xE() {
 
     switch (opcode & 0x000F) {
 
-        case 0x0001:
-            // for 0xEXA1 if key pressed is equal to vX skip next instruction
+        case 0x000E:
+            // for 0xEX9E if key pressed is not equal to vX skip next instruction
 
             if(key[v[(opcode & 0x0F00) >> 8]]) PC += 2;
             PC += 2;
 
             break;
 
-        case 0x000E:
-            // for 0xEX9E if key pressed is not equal to vX skip next instruction
+        case 0x0001:
 
-            if(!key[v[(opcode & 0x0F00) >> 8]]) PC += 2;
+            // for 0xEXA1 if key pressed is equal to vX skip next instruction
+
+
+            if(key[v[(opcode & 0x0F00) >> 8]] == 0) PC += 2;
             PC += 2;
 
             break;
@@ -500,5 +528,17 @@ void Chip8::setDrawFlag(bool _drawFlag) {
 uint8_t Chip8::getGrahicsAt(int y, int x) {
 
     return graphics[y * GRAPHICS_WIDTH + x];
+
+}
+
+void Chip8::setKey(uint8_t keycode) {
+
+    key[keycode] = 1;
+
+}
+
+void Chip8::unsetKey(uint8_t keycode) {
+
+    key[keycode] = 0;
 
 }

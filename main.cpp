@@ -12,6 +12,7 @@ struct engine_t {
 
     uint8_t drawMap[GRAPHICS_HEIGHT * GRAPHICS_WIDTH] = { 0 };
 
+    bool renderFlag = true;
     bool quit = false;
 
 
@@ -22,21 +23,80 @@ void init(engine_t& engine){
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    engine.window = SDL_CreateWindow("Chip8",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, GRAPHICS_WIDTH * PIXEL_SIZE,GRAPHICS_HEIGHT * PIXEL_SIZE, SDL_WINDOW_SHOWN);
+    engine.window = SDL_CreateWindow("Chip8",
+                                     SDL_WINDOWPOS_UNDEFINED,
+                                     SDL_WINDOWPOS_UNDEFINED,
+                                     GRAPHICS_WIDTH * PIXEL_SIZE,
+                                     GRAPHICS_HEIGHT * PIXEL_SIZE,
+                                     SDL_WINDOW_SHOWN);
     engine.renderer = SDL_CreateRenderer(engine.window, -1, SDL_RENDERER_ACCELERATED);
 
 
 }
 
-void handle(engine_t& engine){
+void handle(engine_t &engine, Chip8 *&chip8) {
 
     SDL_Event e;
 
+
+    SDL_Keycode keyTranslation[KEY_S] = {
+
+            SDLK_x, // 0
+            SDLK_1, // 1
+            SDLK_2, // 2
+            SDLK_3, // 3
+            SDLK_q, // 4
+            SDLK_w, // 5
+            SDLK_e, // 6
+            SDLK_a, //7
+            SDLK_s, // 8
+            SDLK_d, // 9
+            SDLK_z, // A
+            SDLK_c, // B
+            SDLK_4, // C
+            SDLK_r, // D
+            SDLK_f, // E
+            SDLK_v // F
+    };
+
+
     while(SDL_PollEvent(&e)){
 
-        if(e.type == SDL_QUIT){
+        switch (e.type) {
 
-            engine.quit = true;
+            case SDL_QUIT:
+                engine.quit = true;
+                break;
+            case SDL_KEYDOWN:
+
+               for(int i = 0; i < KEY_S; i++){
+
+                   if(e.key.keysym.sym == keyTranslation[i]) {
+
+                       chip8->setKey(i);
+                       break;
+
+                   }
+
+
+               }
+
+
+                break;
+            case SDL_KEYUP:
+
+                for(int i = 0; i < KEY_S; i++){
+
+                    if(e.key.keysym.sym == keyTranslation[i]) {
+
+                        chip8->unsetKey(i);
+                        break;
+
+                    }
+
+                }
+
+                break;
 
         }
 
@@ -61,7 +121,7 @@ void update(engine_t& engine, Chip8*& chip8){
         }
 
         chip8->setDrawFlag(false);
-
+        engine.renderFlag = true;
     }
 
 }
@@ -75,8 +135,9 @@ void render(engine_t &engine) {
     SDL_RenderFillRect(engine.renderer,&fillRect);
 
 
-
     SDL_SetRenderDrawColor(engine.renderer,0xFF,0xFF,0xFF,SDL_ALPHA_OPAQUE);
+
+
     for(int y = 0; y < GRAPHICS_HEIGHT; y++){
 
         for(int x = 0; x < GRAPHICS_WIDTH; x++){
@@ -89,9 +150,6 @@ void render(engine_t &engine) {
         }
 
     }
-
-
-
 
     SDL_RenderPresent(engine.renderer);
 
@@ -107,15 +165,27 @@ int main() {
     init(engine);
 
     auto* chip8 = Chip8::Instance();
-    chip8->loadProgram("../pong.rom");
-
+    chip8->loadProgram("../c8games/UFO");
 
     while(!engine.quit){
 
+        uint64_t start = SDL_GetPerformanceCounter();
+
         chip8->cycle();
-        handle(engine);
+        handle(engine, chip8);
         update(engine,chip8);
-        render(engine);
+
+        if(engine.renderFlag){
+
+            render(engine);
+            engine.renderFlag = false;
+
+        }
+        uint64_t end = SDL_GetPerformanceCounter();
+
+        auto et = (double)(end - start) / (double) SDL_GetPerformanceFrequency() * 1000.f;
+
+        SDL_Delay(floor(4.0 - et));
 
     }
 
